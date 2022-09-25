@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>숫자야구</title>
+</head>
+<body>
+    <form id="form">
+        <input type="text" id="input">
+        <button>확인</button>
+    </form>
+    <div id="logs"></div>
+    <script>
+        const $input = document.querySelector('#input');
+        const $form = document.querySelector('#form');
+        const $logs = document.querySelector('#logs');
+
+        const numbers = [];
+        for(let i = 1; i<10; i++){
+            numbers.push(i);
+        }
+
+        const answer = [];
+        for(let i = 0; i<4; i++){
+            const index = Math.floor(Math.random() * numbers.length);
+            answer.push(numbers[index]);
+            numbers.splice(index,1);
+        }
+        console.log(answer);
+
+        const tries = [];
+        function checkInput(input) {
+            if(input.length !== 4){
+                return alert('4자리 숫자를 입력해주세요.');
+            }
+            if(new Set(input).size !== 4){
+                return alert('중복되지 않게 입력해주세요.');
+            }
+            if(tries.includes(input)){
+                return alert('이미 시도한 값입니다.');
+            }
+            return true;
+        }
+        
+        let out = 0;
+        $form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const value = $input.value; // 문자열로 들어온다.
+            $input.value = '';
+            const valid = checkInput(value);
+            if(!valid) return;
+            if(answer.join('') === value) {
+                $logs.textContent = '홈런!';
+                return;
+            }
+            if(tries.length >= 9){
+                // 9가 10이 되면 기회가 11번 주어진다. 마지막 기회는 저장되면 안되고 바로 정답이 나와야함.
+                const message = document.createTextNode(`패배! 정답은 ${answer.join('')}`);
+                $logs.appendChild(message);
+                return;
+            }
+
+            let strike = 0;
+            let ball = 0;  
+            for(let i = 0; i<answer.length; i++){
+                const index = value.indexOf(answer[i]);
+                if(index > -1){
+                    if(index === i){
+                        strike += 1;
+                    } else {
+                        ball += 1;
+                    }
+                }
+            }
+
+            if(strike === 0 && ball === 0){
+                $logs.append(`${value}: 아웃`, document.createElement('br'));
+                out++;
+            } else {
+            $logs.append(`${value}: ${strike} 스트라이크 ${ball} 볼`, document.createElement('br'));
+            }
+            if(out === 3){
+                const message = document.createTextNode(`패배! 정답은 ${answer.join('')}`);
+                $logs.appendChild(message);
+                return;
+            }
+            tries.push(value);
+        });
+    </script>
+</body>
+</html>
